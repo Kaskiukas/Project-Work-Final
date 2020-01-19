@@ -22,6 +22,7 @@ public class SingUp {
 
 	protected Shell shell;
 	private Text text;
+	public SelectData sd = new SelectData();
 	public String name;
 	public int wordAmount;
 	public int levelId;
@@ -61,7 +62,7 @@ public class SingUp {
 	public void createContents() {
 		shell = new Shell();
 		shell.setSize(450, 300);
-		shell.setText("Kalbos dezute - Registruotis");
+		shell.setText("Kalbos dežutė - Registruotis");
 
 		Label lblNewLabel = new Label(shell, SWT.WRAP | SWT.CENTER);
 		lblNewLabel.setFont(SWTResourceManager.getFont("Segoe UI", 14, SWT.BOLD));
@@ -74,53 +75,68 @@ public class SingUp {
 		lblNewLabel_1.setText("Vardas");
 
 		text = new Text(shell, SWT.BORDER);
-		text.setBounds(173, 76, 78, 26);
+		text.setBounds(173, 76, 140, 26);
 
 		Label lblNewLabel_2 = new Label(shell, SWT.NONE);
 		lblNewLabel_2.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
-		lblNewLabel_2.setBounds(41, 149, 150, 20);
+		lblNewLabel_2.setBounds(41, 129, 150, 20);
 		lblNewLabel_2.setText("Naujų žodžių skaičius");
 
 		Label lblNewLabel_3 = new Label(shell, SWT.NONE);
 		lblNewLabel_3.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
-		lblNewLabel_3.setBounds(41, 196, 108, 20);
+		lblNewLabel_3.setBounds(41, 176, 108, 20);
 		lblNewLabel_3.setText("Žodžių grupė");
+
+		Label lblNewLabel_4 = new Label(shell, SWT.NONE);
+		lblNewLabel_4.setFont(SWTResourceManager.getFont("Segoe UI", 8, SWT.NORMAL));
+		lblNewLabel_4.setForeground(SWTResourceManager.getColor(SWT.COLOR_RED));
+		lblNewLabel_4.setBounds(173, 108, 241, 15);
+		lblNewLabel_4.setText("Toks vartotojo vardas jau sukurtas !");
+		lblNewLabel_4.setVisible(false);
 
 		Spinner spinner = new Spinner(shell, SWT.BORDER);
 		spinner.setMinimum(1);
-		spinner.setBounds(254, 149, 59, 26);
+		spinner.setBounds(254, 129, 59, 26);
 
 		Combo combo = new Combo(shell, SWT.NONE);
 
 		combo.setItems(new String[] { "I Grupė", "II Grupė", "III Grupė" });
-		combo.setBounds(234, 196, 97, 28);
+		combo.setBounds(234, 176, 97, 28);
 
 		Button btnNewButton = new Button(shell, SWT.NONE);
+		btnNewButton.setBounds(334, 221, 90, 30);
+		btnNewButton.setText("Pradėti");
+
 		btnNewButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseUp(MouseEvent e) {
 
-				InsertData insertNewUser = new InsertData();
-				String name = text.getText();
-				int wordAmount = Integer.parseInt(spinner.getText());
+				boolean isUser = sd.searchUsername(text.getText());
+				if (isUser) {
+					lblNewLabel_4.setVisible(true);
+				} else {
 
-				SelectData sd = new SelectData();
-				String groupName = combo.getText();
-				int levelId = sd.selectWordGroup(groupName);
+					InsertData insertNewUser = new InsertData();
+					String name = text.getText();
+					int wordAmount = Integer.parseInt(spinner.getText());
 
-				insertNewUser.insertUserToDB(name, wordAmount, levelId);
+					SelectData sd = new SelectData();
+					String groupName = combo.getText();
+					int levelId = sd.selectWordGroup(groupName);
 
-				Users user = new Users(name, wordAmount, levelId);
+					insertNewUser.insertUserToDB(name, wordAmount, levelId);
 
-				Boxes.all.getUser().add(user);
+					Users user = new Users(name, wordAmount, levelId);
 
-				shell.close();
-				Boxes box01 = new Boxes();
-				box01.open();
+					Boxes.all.getUser().add(user);
+
+					shell.close();
+					Boxes box01 = new Boxes();
+					box01.open();
+				}
+
 			}
 		});
-		btnNewButton.setBounds(318, 21, 90, 30);
-		btnNewButton.setText("Pradėti");
 
 		Button btnNewButton_1 = new Button(shell, SWT.NONE);
 		btnNewButton_1.addMouseListener(new MouseAdapter() {

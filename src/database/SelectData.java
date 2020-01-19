@@ -49,7 +49,8 @@ public class SelectData {
 		ConnectDataBase cdb = new ConnectDataBase();
 		AllLists al = new AllLists();
 
-		String sql = ""; // TODO parasyti Query kuris is DB isrinktu pagal dezutes ir sudeliotu zodzius i listus
+		String sql = ""; // TODO parasyti Query kuris is DB isrinktu pagal dezutes ir sudeliotu zodzius i
+							// listus
 
 		try (Connection conn = cdb.connectDB();
 				Statement stmt = conn.createStatement();
@@ -114,4 +115,26 @@ public class SelectData {
 		return groupID;
 	}
 
+	public boolean searchUsername(String userName) {
+
+		ConnectDataBase cdb = new ConnectDataBase();
+
+		boolean isUserName = false;
+		String sql = "SELECT Vardas FROM Users";
+
+		try (Connection conn = cdb.connectDB();
+				Statement stmt = conn.createStatement();
+				ResultSet rs = stmt.executeQuery(sql)) {
+
+			while (rs.next() || isUserName) {
+				if (rs.getString("Vardas").equalsIgnoreCase(userName)) {
+					isUserName = true;
+				}
+			}
+
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+		}
+		return isUserName;
+	}
 }

@@ -76,7 +76,7 @@ public class Boxes {
 
 		shell = new Shell();
 		shell.setSize(592, 463);
-		shell.setText("Kalbos dezute");
+		shell.setText("Kalbos dežutė");
 
 		userName = all.getUser().get(0).getName();
 		newWordQuantity = all.getUser().get(0).getWordAmount();
@@ -143,7 +143,7 @@ public class Boxes {
 		Label lblNewLabel = new Label(shell, SWT.CENTER);
 		lblNewLabel.setFont(SWTResourceManager.getFont("Segoe UI", 14, SWT.BOLD));
 		lblNewLabel.setBounds(137, 310, 280, 85);
-		lblNewLabel.setText("Jūs Išmokote visus šios grupės žodžius");
+		lblNewLabel.setText("Jūs išmokote visus šios grupės žodžius");
 		lblNewLabel.setVisible(false);
 
 		Button btnNextWord = new Button(shell, SWT.NONE);
@@ -165,7 +165,7 @@ public class Boxes {
 		Label lblENWord = new Label(shell, SWT.CENTER);
 		lblENWord.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.BOLD));
 		lblENWord.setBounds(110, 275, 160, 30);
-		lblENWord.setText("en zodis");
+		lblENWord.setText("EN žodis");
 		lblENWord.setVisible(false);
 		lblENWord.setText(chekingWordOBJ.getWord());
 

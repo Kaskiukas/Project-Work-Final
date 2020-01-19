@@ -91,7 +91,7 @@ public class StartProgram {
 
 		Button btnNewButton_3 = new Button(shell, SWT.NONE);
 		btnNewButton_3.setBounds(58, 191, 90, 30);
-		btnNewButton_3.setText("Taisykles");
+		btnNewButton_3.setText("Taisyklės");
 		btnNewButton_3.setVisible(false);
 
 	}

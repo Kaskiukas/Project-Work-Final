@@ -51,7 +51,7 @@ public class LogIn {
 	protected void createContents() {
 		shlKalbosDezute = new Shell();
 		shlKalbosDezute.setSize(450, 300);
-		shlKalbosDezute.setText("Kalbos dezute - Prisijungti");
+		shlKalbosDezute.setText("Kalbos dežutė - Prisijungti");
 
 		Label lblNewLabel = new Label(shlKalbosDezute, SWT.NONE);
 		lblNewLabel.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
