@@ -6,6 +6,7 @@ import java.sql.Statement;
 
 public class NewTable {
 
+	// (used) Sukure DB su visomis lentelemis
 	public void creatAllTables() {
 
 		// SQL statement for creating a new table
@@ -37,17 +38,10 @@ public class NewTable {
 
 		createNewTable(usersTable);
 
-		String boxTable = "CREATE TABLE IF NOT EXISTS Boxes (\n" 
-				+ "    Dezutes_Id integer PRIMARY KEY AUTOINCREMENT,\n"
-				+ "    Vartotojo_Id integer NOT NULL REFERENCES Users (Vartotojo_Id),\n" 
-				+ "    Dezutes_Nr integer NOT NULL\n"
-				+ "    );";
-
-		createNewTable(boxTable);
-
-		String wordInBox = "CREATE TABLE IF NOT EXISTS Word_in_Box (\n" 
+		String wordInBox = "CREATE TABLE IF NOT EXISTS Word_in_Box (\n"
 				+ "    Id integer PRIMARY KEY AUTOINCREMENT,\n"
-				+ "    Dezutes_Id integer NOT NULL REFERENCES Boxes (Dezutes_Id),\n"
+				+ "    Vartotojo_Id integer NOT NULL REFERENCES Users (Vartotojo_Id),\n"
+				+ "    Dezutes_Id integer NOT NULL,\n"
 				+ "    Zodzio_Id integer NOT NULL REFERENCES Words (Zodzio_Id)\n" 
 				+ "    );";
 
@@ -55,7 +49,6 @@ public class NewTable {
 	}
 
 	// Create a new table in the database
-
 	public void createNewTable(String query) {
 
 		ConnectDataBase ndb = new ConnectDataBase();

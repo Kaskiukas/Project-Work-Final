@@ -17,25 +17,20 @@ public class StartProgram {
 	protected Shell shell;
 
 	// Launch the application.
-
 	public static void main(String[] args) {
 
 		FileReading fr = new FileReading();
-		fr.isDBFile();
+		fr.isDBFile(); // tikrina ar yra DB ir esant poreikiui sukuria, nuskaito faila, sudeda zodzius i DB
 
 		try {
 			StartProgram window = new StartProgram();
 			window.open();
-
 		} catch (Exception e) {
-
 			e.printStackTrace();
 		}
-
 	}
 
 	// Open the window.
-
 	public void open() {
 		Display display = Display.getDefault();
 		createContents();
@@ -49,19 +44,18 @@ public class StartProgram {
 	}
 
 	// Create contents of the window.
-
 	protected void createContents() {
 		shell = new Shell();
 		shell.setSize(450, 300);
 		shell.setText("Kalbos dėžutė");
 
-		Label lblNewLabel = new Label(shell, SWT.WRAP | SWT.CENTER);
-		lblNewLabel.setFont(SWTResourceManager.getFont("Segoe UI", 14, SWT.BOLD));
-		lblNewLabel.setBounds(70, 32, 300, 65);
-		lblNewLabel.setText("Anglų kalbos žodžių mokymosi programa");
+		Label title = new Label(shell, SWT.WRAP | SWT.CENTER);
+		title.setFont(SWTResourceManager.getFont("Segoe UI", 14, SWT.BOLD));
+		title.setBounds(70, 32, 300, 65);
+		title.setText("Anglų kalbos žodžių mokymosi programa");
 
-		Button btnNewButton = new Button(shell, SWT.NONE);
-		btnNewButton.addMouseListener(new MouseAdapter() {
+		Button join = new Button(shell, SWT.NONE);
+		join.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseUp(MouseEvent e) {
 				shell.close();
@@ -69,11 +63,11 @@ public class StartProgram {
 				logIn.open();
 			}
 		});
-		btnNewButton.setBounds(58, 115, 90, 30);
-		btnNewButton.setText("Prisijungti");
+		join.setBounds(58, 115, 90, 30);
+		join.setText("Prisijungti");
 
-		Button btnNewButton_1 = new Button(shell, SWT.NONE);
-		btnNewButton_1.addMouseListener(new MouseAdapter() {
+		Button register = new Button(shell, SWT.NONE);
+		register.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseUp(MouseEvent e) {
 				shell.close();
@@ -81,18 +75,18 @@ public class StartProgram {
 				singUp.open();
 			}
 		});
-		btnNewButton_1.setBounds(256, 115, 90, 30);
-		btnNewButton_1.setText("Registruotis");
+		register.setBounds(256, 115, 90, 30);
+		register.setText("Registruotis");
 
-		Button btnNewButton_2 = new Button(shell, SWT.NONE);
-		btnNewButton_2.setBounds(256, 191, 90, 30);
-		btnNewButton_2.setText("Statistika");
-		btnNewButton_2.setVisible(false);
+		Button statistics = new Button(shell, SWT.NONE);
+		statistics.setBounds(256, 191, 90, 30);
+		statistics.setText("Statistika");
+		statistics.setVisible(false);
 
-		Button btnNewButton_3 = new Button(shell, SWT.NONE);
-		btnNewButton_3.setBounds(58, 191, 90, 30);
-		btnNewButton_3.setText("Taisyklės");
-		btnNewButton_3.setVisible(false);
+		Button rules = new Button(shell, SWT.NONE);
+		rules.setBounds(58, 191, 90, 30);
+		rules.setText("Taisyklės");
+		rules.setVisible(false);
 
 	}
 }

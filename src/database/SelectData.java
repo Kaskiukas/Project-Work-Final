@@ -6,17 +6,18 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
-import logic.AllLists;
+import logic.Users;
 import logic.Word;
 
 public class SelectData {
 
+	// (used) sudedami zodziai i userlista
 	public void selectWordsForStart(ArrayList<Word> userList, Integer gr) {
 
 		ConnectDataBase cdb = new ConnectDataBase();
 
 		String groupId = gr.toString();
-		String sql = "SELECT Zodzio_Id, pavadinimas, reiksme, Tarimas, yra_To, vertimas FROM Words w\r\n"
+		String sql = "SELECT Zodzio_Id, Pavadinimas, reiksme, Tarimas, yra_To, vertimas FROM Words w\r\n"
 				+ "JOIN WordGroups wg ON w.Grupes_Id = wg.Grupes_Id\r\n" + "Where w.Grupes_Id = " + groupId;
 
 		try (Connection conn = cdb.connectDB();
@@ -35,22 +36,22 @@ public class SelectData {
 
 				Word words = new Word(wordId, group, word, phonetic, withTo, translation);
 				userList.add(words);
-
 			}
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
 		}
 	}
 
-	// TODO Sis metodas dar nepabaigtas ir nenaudojamas
-
-	public void selectWordsOfUser(String userName) {
+	// (used) uzkrauna zodzius i lista po autosave
+	public void selectWordsOfUser(Integer userId, ArrayList<Word> intoList, Integer boxNr) {
 
 		ConnectDataBase cdb = new ConnectDataBase();
-		AllLists al = new AllLists();
 
-		String sql = ""; // TODO parasyti Query kuris is DB isrinktu pagal dezutes ir sudeliotu zodzius i
-							// listus
+		String uId = userId.toString();
+		String bNr = boxNr.toString();
+		String sql = "SELECT Zodzio_Id, Grupes_Id, reiksme, Tarimas, yra_To, vertimas FROM Words \r\n"
+				+ "WHERE Zodzio_Id IN (SELECT Zodzio_Id FROM Word_in_Box WHERE Vartotojo_Id = " + uId
+				+ " AND Dezutes_Id = " + bNr + ")";
 
 		try (Connection conn = cdb.connectDB();
 				Statement stmt = conn.createStatement();
@@ -60,48 +61,27 @@ public class SelectData {
 			while (rs.next()) {
 
 				int wordId = rs.getInt("Zodzio_Id");
-				int group = rs.getInt("Pavadinimas");
+				int group = rs.getInt("Grupes_Id");
 				String word = rs.getString("reiksme");
 				String phonetic = rs.getString("Tarimas");
 				int withTo = rs.getInt("yra_To");
 				String translation = rs.getString("Vertimas");
 
 				Word words = new Word(wordId, group, word, phonetic, withTo, translation);
-
-				if (rs.getInt("Dezutes_Id") == 0) {
-					al.getUserList().add(words);
-				}
-				if (rs.getInt("Dezutes_Id") == 1) {
-					al.getBox1().add(words);
-				}
-				if (rs.getInt("Dezutes_Id") == 2) {
-					al.getBox2().add(words);
-				}
-				if (rs.getInt("Dezutes_Id") == 3) {
-					al.getBox3().add(words);
-				}
-				if (rs.getInt("Dezutes_Id") == 4) {
-					al.getBox4().add(words);
-				}
-				if (rs.getInt("Dezutes_Id") == 5) {
-					al.getBox5().add(words);
-				}
-				if (rs.getInt("Dezutes_Id") == 6) {
-					al.getBox6().add(words);
-				}
-
+				intoList.add(words);
 			}
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
 		}
 	}
 
+	// (used) suranda zodziu grupes id
 	public int selectWordGroup(String gruopName) {
 
 		ConnectDataBase cdb = new ConnectDataBase();
 
 		int groupID = 0;
-		String sql = "SELECT Grupes_Id FROM WordGroups wg WHERE pavadinimas = " + "\"" + gruopName + "\"";
+		String sql = "SELECT Grupes_Id FROM WordGroups WHERE pavadinimas = " + "\"" + gruopName + "\"";
 
 		try (Connection conn = cdb.connectDB();
 				Statement stmt = conn.createStatement();
@@ -115,6 +95,7 @@ public class SelectData {
 		return groupID;
 	}
 
+	// (used) iesko DB ar toks vartotojo vardas yra
 	public boolean searchUsername(String userName) {
 
 		ConnectDataBase cdb = new ConnectDataBase();
@@ -131,10 +112,98 @@ public class SelectData {
 					isUserName = true;
 				}
 			}
-
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
 		}
 		return isUserName;
 	}
+
+	// (used) sudeta vartotoju vardus i lista
+	public void allUsersList(ArrayList<String> allUsers) {
+
+		ConnectDataBase cdb = new ConnectDataBase();
+
+		String sql = "SELECT Vardas FROM Users";
+
+		try (Connection conn = cdb.connectDB();
+				Statement stmt = conn.createStatement();
+				ResultSet rs = stmt.executeQuery(sql)) {
+
+			while (rs.next()) {
+
+				allUsers.add(rs.getString("Vardas"));
+			}
+
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+		}
+	}
+
+	// (used) sukuria vartotojo objekta (OBJ) ir ideda i lista
+	public void selectUser(ArrayList<Users> userOBJ, String userName) {
+
+		ConnectDataBase cdb = new ConnectDataBase();
+
+		String sql = "SELECT * FROM Users WHERE Vardas = " + "\"" + userName + "\"";
+
+		try (Connection conn = cdb.connectDB();
+				Statement stmt = conn.createStatement();
+				ResultSet rs = stmt.executeQuery(sql)) {
+
+			while (rs.next()) {
+
+				int userId = rs.getInt("Vartotojo_Id");
+				String name = rs.getString("Vardas");
+				int wordAmount = rs.getInt("Zodziu_skaicius");
+				int wordGroup = rs.getInt("Grupes_Id");
+
+				Users user = new Users(userId, name, wordAmount, wordGroup);
+				userOBJ.add(user);
+			}
+
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+		}
+	}
+	
+		// (used) suskaiciuoja visus userio zodzius
+		public int countAllUserWord(Integer userId) {
+
+			ConnectDataBase cdb = new ConnectDataBase();
+
+			int count = 0;
+			String sql = "SELECT COUNT (Zodzio_Id) AS Total FROM Word_in_Box WHERE Vartotojo_Id = " + userId;
+
+			try (Connection conn = cdb.connectDB();
+					Statement stmt = conn.createStatement();
+					ResultSet rs = stmt.executeQuery(sql)) {
+
+				count = rs.getInt("Total");
+
+			} catch (SQLException e) {
+				System.out.println(e.getMessage());
+			}
+			return count;
+		}	
+		
+		// (used) suskaiciuoja visus userio ismoktus zodzius
+				public int countAllLearnedUserWord(Integer userId) {
+
+					ConnectDataBase cdb = new ConnectDataBase();
+
+					int count = 0;
+					String sql = "SELECT COUNT (Zodzio_Id) AS Total FROM Word_in_Box WHERE Vartotojo_Id = " + userId + " AND Dezutes_Id = " + 7;
+
+					try (Connection conn = cdb.connectDB();
+							Statement stmt = conn.createStatement();
+							ResultSet rs = stmt.executeQuery(sql)) {
+
+						count = rs.getInt("Total");
+
+					} catch (SQLException e) {
+						System.out.println(e.getMessage());
+					}
+					return count;
+				}
+
 }

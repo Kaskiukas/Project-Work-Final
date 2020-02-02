@@ -9,7 +9,7 @@ import org.eclipse.swt.widgets.Text;
 
 import database.InsertData;
 import database.SelectData;
-import logic.Users;
+import logic.Moving;
 
 import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Combo;
@@ -22,16 +22,8 @@ public class SingUp {
 
 	protected Shell shell;
 	private Text text;
-	public SelectData sd = new SelectData();
-	public String name;
-	public int wordAmount;
-	public int levelId;
 
-	/**
-	 * Launch the application.
-	 * 
-	 * @param args
-	 */
+	// Launch the application.
 	public static void main(String[] args) {
 		try {
 			SingUp window = new SingUp();
@@ -41,9 +33,7 @@ public class SingUp {
 		}
 	}
 
-	/**
-	 * Open the window.
-	 */
+	// Open the window.
 	public void open() {
 		Display display = Display.getDefault();
 		createContents();
@@ -56,90 +46,90 @@ public class SingUp {
 		}
 	}
 
-	/**
-	 * Create contents of the window.
-	 */
+	// Create contents of the window.
 	public void createContents() {
 		shell = new Shell();
 		shell.setSize(450, 300);
 		shell.setText("Kalbos dežutė - Registruotis");
 
-		Label lblNewLabel = new Label(shell, SWT.WRAP | SWT.CENTER);
-		lblNewLabel.setFont(SWTResourceManager.getFont("Segoe UI", 14, SWT.BOLD));
-		lblNewLabel.setBounds(68, 21, 188, 49);
-		lblNewLabel.setText("Naujas vartotojas");
+		Label newUserTitle = new Label(shell, SWT.WRAP | SWT.CENTER);
+		newUserTitle.setFont(SWTResourceManager.getFont("Segoe UI", 14, SWT.BOLD));
+		newUserTitle.setBounds(68, 21, 188, 49);
+		newUserTitle.setText("Naujas vartotojas");
 
-		Label lblNewLabel_1 = new Label(shell, SWT.NONE);
-		lblNewLabel_1.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
-		lblNewLabel_1.setBounds(41, 77, 70, 20);
-		lblNewLabel_1.setText("Vardas");
+		Label newUserNameTitle = new Label(shell, SWT.NONE);
+		newUserNameTitle.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
+		newUserNameTitle.setBounds(41, 77, 70, 20);
+		newUserNameTitle.setText("Vardas");
 
 		text = new Text(shell, SWT.BORDER);
 		text.setBounds(173, 76, 140, 26);
 
-		Label lblNewLabel_2 = new Label(shell, SWT.NONE);
-		lblNewLabel_2.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
-		lblNewLabel_2.setBounds(41, 129, 150, 20);
-		lblNewLabel_2.setText("Naujų žodžių skaičius");
+		Label newWordsQuantityTitle = new Label(shell, SWT.NONE);
+		newWordsQuantityTitle.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
+		newWordsQuantityTitle.setBounds(41, 129, 150, 20);
+		newWordsQuantityTitle.setText("Naujų žodžių skaičius");
 
-		Label lblNewLabel_3 = new Label(shell, SWT.NONE);
-		lblNewLabel_3.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
-		lblNewLabel_3.setBounds(41, 176, 108, 20);
-		lblNewLabel_3.setText("Žodžių grupė");
+		Label wordsGroupTitle = new Label(shell, SWT.NONE);
+		wordsGroupTitle.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
+		wordsGroupTitle.setBounds(41, 176, 108, 20);
+		wordsGroupTitle.setText("Žodžių grupė");
 
-		Label lblNewLabel_4 = new Label(shell, SWT.NONE);
-		lblNewLabel_4.setFont(SWTResourceManager.getFont("Segoe UI", 8, SWT.NORMAL));
-		lblNewLabel_4.setForeground(SWTResourceManager.getColor(SWT.COLOR_RED));
-		lblNewLabel_4.setBounds(173, 108, 241, 15);
-		lblNewLabel_4.setText("Toks vartotojo vardas jau sukurtas !");
-		lblNewLabel_4.setVisible(false);
+		Label existingUserErrorTitle = new Label(shell, SWT.NONE);
+		existingUserErrorTitle.setFont(SWTResourceManager.getFont("Segoe UI", 8, SWT.NORMAL));
+		existingUserErrorTitle.setForeground(SWTResourceManager.getColor(SWT.COLOR_RED));
+		existingUserErrorTitle.setBounds(173, 108, 241, 15);
+		existingUserErrorTitle.setText("Toks vartotojo vardas jau sukurtas !");
+		existingUserErrorTitle.setVisible(false);
 
 		Spinner spinner = new Spinner(shell, SWT.BORDER);
 		spinner.setMinimum(1);
 		spinner.setBounds(254, 129, 59, 26);
 
 		Combo combo = new Combo(shell, SWT.NONE);
-
 		combo.setItems(new String[] { "I Grupė", "II Grupė", "III Grupė" });
 		combo.setBounds(234, 176, 97, 28);
 
-		Button btnNewButton = new Button(shell, SWT.NONE);
-		btnNewButton.setBounds(334, 221, 90, 30);
-		btnNewButton.setText("Pradėti");
-
-		btnNewButton.addMouseListener(new MouseAdapter() {
+		Button start = new Button(shell, SWT.NONE);
+		start.setBounds(334, 221, 90, 30);
+		start.setText("Pradėti");
+		start.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseUp(MouseEvent e) {
 
-				boolean isUser = sd.searchUsername(text.getText());
+				SelectData sd = new SelectData();
+				boolean isUser = sd.searchUsername(text.getText()); // iesko DB ar toks vartotojo vardas yra
 				if (isUser) {
-					lblNewLabel_4.setVisible(true);
+					existingUserErrorTitle.setVisible(true);
 				} else {
 
-					InsertData insertNewUser = new InsertData();
 					String name = text.getText();
 					int wordAmount = Integer.parseInt(spinner.getText());
-
-					SelectData sd = new SelectData();
 					String groupName = combo.getText();
-					int levelId = sd.selectWordGroup(groupName);
+					int groupId = sd.selectWordGroup(groupName); // suranda zodziu grupes id
 
-					insertNewUser.insertUserToDB(name, wordAmount, levelId);
+					InsertData id = new InsertData();
+					id.insertUserToDB(name, wordAmount, groupId); // iraso vartotoja i DB
 
-					Users user = new Users(name, wordAmount, levelId);
+					sd.selectUser(Boxes.all.getUser(), name); // sukuria vartotojo objekta (OBJ) ir ideda i lista
+					int userId = Boxes.all.getUser().get(0).getUserId();
 
-					Boxes.all.getUser().add(user);
+					sd.selectWordsForStart(Boxes.all.getUserList(), groupId); // sudedami zodziai i userlista
+
+					Moving moving = new Moving();
+					moving.autoSave(Boxes.all.getUserList(), userId, 0); // issaugoja vartotojo pasirinktus zodziu DB
 
 					shell.close();
-					Boxes box01 = new Boxes();
-					box01.open();
+					Boxes boxes = new Boxes();
+					boxes.open();
 				}
-
 			}
 		});
 
-		Button btnNewButton_1 = new Button(shell, SWT.NONE);
-		btnNewButton_1.addMouseListener(new MouseAdapter() {
+		Button mainWindow = new Button(shell, SWT.NONE);
+		mainWindow.setBounds(10, 221, 90, 30);
+		mainWindow.setText("Pagrindinis");
+		mainWindow.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseUp(MouseEvent e) {
 
@@ -148,8 +138,7 @@ public class SingUp {
 				startProgram.open();
 			}
 		});
-		btnNewButton_1.setBounds(10, 221, 90, 30);
-		btnNewButton_1.setText("Pagrindinis");
 
 	}
+
 }

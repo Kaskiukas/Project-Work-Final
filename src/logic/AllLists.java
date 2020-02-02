@@ -21,6 +21,16 @@ public class AllLists {
 	ArrayList<Word> movingUp6 = new ArrayList<>();
 
 	ArrayList<Users> user = new ArrayList<>();
+	
+	ArrayList<String> allUsers = new ArrayList<>();
+		
+	public ArrayList<String> getAllUsers() {
+		return allUsers;
+	}
+
+	public void setAllUsers(ArrayList<String> allUsers) {
+		this.allUsers = allUsers;
+	}
 
 	public ArrayList<Word> getBoxNA() {
 		return boxNA;

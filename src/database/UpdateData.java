@@ -6,20 +6,19 @@ import java.sql.SQLException;
 
 public class UpdateData {
 
-	// TODO kolkas neaprasytas ir nenaudojamas, gal ir neprireiks UPDATE
-
-	public void autoSave(int id, String name, double capacity) {
+	// (used) atnaujina zodzio dezutes numeri
+	public void autoSave(Integer userId, Integer wordId, Integer boxNr) {
 
 		ConnectDataBase cdb = new ConnectDataBase();
 
-		String sql = "UPDATE warehouses SET name = ? , " + "capacity = ? " + "WHERE id = ?";
+		String sql = "UPDATE Word_in_Box SET Dezutes_Id = ?" + " WHERE Vartotojo_Id = ?"  + " AND" + " Zodzio_Id = ?";
 
 		try (Connection conn = cdb.connectDB(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
 			// set the corresponding param
-			pstmt.setString(1, name);
-			pstmt.setDouble(2, capacity);
-			pstmt.setInt(3, id);
+			pstmt.setInt(1, boxNr);
+			pstmt.setInt(2, userId);
+			pstmt.setInt(3, wordId);
 			// update
 			pstmt.executeUpdate();
 		} catch (SQLException e) {

@@ -15,7 +15,6 @@ public class ConnectDataBase {
 	public Connection connectDB() {
 
 		// SQLite connection string
-
 		String url = "jdbc:sqlite:C:\\My Files\\My Cooding\\eclipse-workspace\\Java\\01 Project Work\\Kalbos dezute.db";
 
 		Connection conn = null;

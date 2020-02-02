@@ -8,7 +8,10 @@ import java.util.ArrayList;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Text;
+
+import database.DeleteData;
 import database.SelectData;
+import database.UpdateData;
 import logic.AllLists;
 import logic.Moving;
 import logic.Word;
@@ -23,26 +26,28 @@ public class Boxes {
 	public Shell shell;
 	public Text text;
 	public static AllLists all = new AllLists(); // sukuriami visi reikalingi listai
+	public static UpdateData ud = new UpdateData();
+	public static DeleteData dd = new DeleteData();
 	public static SelectData sd = new SelectData();
 	public static Moving moving = new Moving();
-	public static SingUp user = new SingUp();
 	public static Word chekingWordOBJ;
 	public String chekingWord;
 	public String answerWord;
+	public String userName;
 	public int boxNr;
 	public int primaryULsize;
 	public int leftToLearn;
 	public int leftInBox;
 	public int learned;
-	public String userName;
+	public int userId;
+	public int wordId;
 	public int newWordQuantity;
 	public int wordGroupId;
+	public int color;
 	public ArrayList<Word> currentBox;
 	public ArrayList<Word> currentMoveBox;
-	public int color;
 
 	// Launch the application.
-
 	public static void main(String[] args) {
 
 		try {
@@ -51,12 +56,9 @@ public class Boxes {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
 	}
 
-	/**
-	 * Open the window.
-	 */
+	// Open the window.
 	public void open() {
 		Display display = Display.getDefault();
 		createContents();
@@ -69,52 +71,54 @@ public class Boxes {
 		}
 	}
 
-	/**
-	 * Create contents of the window.
-	 */
+	//Create contents of the window.
 	public void createContents() {
 
 		shell = new Shell();
 		shell.setSize(592, 463);
 		shell.setText("Kalbos dežutė");
 
+		userId = all.getUser().get(0).getUserId();
 		userName = all.getUser().get(0).getName();
 		newWordQuantity = all.getUser().get(0).getWordAmount();
-		wordGroupId = all.getUser().get(0).getWordLevel();
+		wordGroupId = all.getUser().get(0).getWordGroup();
 
-		currentBox = all.getBox1();
+		moving.notEmptyList().forEach((key, value) -> { //suranda pirma netuscia lista
+			boxNr = key;
+			currentBox = value;
+        });
 		currentMoveBox = all.getMovingUp2();
 
-		sd.selectWordsForStart(all.getUserList(), wordGroupId); // sudedami zodziai i userlista
-		boxNr = 1;
-		primaryULsize = all.getUserList().size();
-		learned = 0;
+		if (!all.getUserList().isEmpty()) {		// papildo pirma dezute naujais zodziais
+			moving.updateBox1ByNewWords(all.getUserList(), all.getMovingDown(),	all.getBox1(), newWordQuantity);
+		} else {
+			moving.updateBoxFromMovingList(all.getMovingDown(), all.getBox1());
+		}
+		
+		primaryULsize = sd.countAllUserWord(userId);
+		learned = sd.countAllLearnedUserWord(userId);
 		leftToLearn = primaryULsize - learned;
-
-		Button btnNextBox = new Button(shell, SWT.NONE);
-
-		btnNextBox.setBounds(427, 360, 137, 30);
-		btnNextBox.setText("Naujas ciklas");
-		btnNextBox.setVisible(false);
 
 		Label leftLearnWordValue = new Label(shell, SWT.CENTER);
 		leftLearnWordValue.setBounds(95, 60, 50, 25);
 		leftLearnWordValue.setText(Integer.toString(leftToLearn)); // likusiu ismokti zodziu kiekis
+		leftInBox = currentBox.size();
 
-		moving.updateBox1ByNewWords(all.getUserList(), all.getMovingDown(), all.getBox1(), newWordQuantity);
-		leftInBox = all.getBox1().size();
-
-		int index = moving.RandomGenerator(all.getBox1());
-		chekingWordOBJ = all.getBox1().remove(index);
+		// Pirmasis zodis
+		
+		
+		int index = moving.RandomGenerator(currentBox);	//moving.RandomGenerator(all.getBox1());
+		chekingWordOBJ = currentBox.remove(index);		//all.getBox1().remove(index);
 		chekingWord = chekingWordOBJ.getWord();
+		wordId = chekingWordOBJ.getWordId();
 
 		Label wordTranslationValue = new Label(shell, SWT.NONE);
-		wordTranslationValue.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.BOLD));
+		wordTranslationValue.setFont(SWTResourceManager.getFont("Courier New", 10, SWT.BOLD));
 		wordTranslationValue.setBounds(245, 160, 260, 30);
 		wordTranslationValue.setText(chekingWordOBJ.getTranslation());
 
 		text = new Text(shell, SWT.BORDER | SWT.CENTER);
-		text.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.BOLD));
+		text.setFont(SWTResourceManager.getFont("Courier New", 10, SWT.BOLD));
 		text.setBounds(235, 200, 150, 30);
 
 		Label lableIsTo = new Label(shell, SWT.NONE);
@@ -127,8 +131,10 @@ public class Boxes {
 			lableIsTo.setVisible(true);
 		}
 
-		Button btnMainWindow = new Button(shell, SWT.NONE);
-		btnMainWindow.addMouseListener(new MouseAdapter() {
+		Button mainWindow = new Button(shell, SWT.NONE);
+		mainWindow.setBounds(25, 360, 90, 30);
+		mainWindow.setText("Pagrindinis");
+		mainWindow.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseUp(MouseEvent e) {
 
@@ -137,15 +143,7 @@ public class Boxes {
 				startProgram.open();
 			}
 		});
-		btnMainWindow.setBounds(25, 360, 90, 30);
-		btnMainWindow.setText("Pagrindinis");
-
-		Label lblNewLabel = new Label(shell, SWT.CENTER);
-		lblNewLabel.setFont(SWTResourceManager.getFont("Segoe UI", 14, SWT.BOLD));
-		lblNewLabel.setBounds(137, 310, 280, 85);
-		lblNewLabel.setText("Jūs išmokote visus šios grupės žodžius");
-		lblNewLabel.setVisible(false);
-
+		
 		Button btnNextWord = new Button(shell, SWT.NONE);
 		btnNextWord.setBounds(420, 250, 90, 30);
 		btnNextWord.setText("Kitas žodis");
@@ -155,66 +153,72 @@ public class Boxes {
 		btnCheckWord.setBounds(420, 200, 90, 30);
 		btnCheckWord.setText("Tikrinti");
 
+		Label learnedAllWordsTitle = new Label(shell, SWT.CENTER);
+		learnedAllWordsTitle.setFont(SWTResourceManager.getFont("Segoe UI", 14, SWT.BOLD));
+		learnedAllWordsTitle.setBounds(137, 310, 280, 85);
+		learnedAllWordsTitle.setText("Jūs išmokote visus šios grupės žodžius");
+		learnedAllWordsTitle.setVisible(false);
+
 		Label lblPhonetic = new Label(shell, SWT.CENTER);
-		lblPhonetic.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.BOLD));
+		lblPhonetic.setFont(SWTResourceManager.getFont("Courier New", 10, SWT.BOLD));
 		lblPhonetic.setBounds(110, 235, 160, 30);
 		lblPhonetic.setText("Tarimas");
 		lblPhonetic.setVisible(false);
 		lblPhonetic.setText(chekingWordOBJ.getPhonetic());
 
 		Label lblENWord = new Label(shell, SWT.CENTER);
-		lblENWord.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.BOLD));
+		lblENWord.setFont(SWTResourceManager.getFont("Courier New", 10, SWT.BOLD));
 		lblENWord.setBounds(110, 275, 160, 30);
 		lblENWord.setText("EN žodis");
 		lblENWord.setVisible(false);
 		lblENWord.setText(chekingWordOBJ.getWord());
 
-		Label lblNewLabel_1 = new Label(shell, SWT.NONE);
-		lblNewLabel_1.setFont(SWTResourceManager.getFont("Segoe UI", 14, SWT.BOLD));
-		lblNewLabel_1.setAlignment(SWT.CENTER);
-		lblNewLabel_1.setBounds(110, 105, 340, 30);
-		lblNewLabel_1.setVisible(true);
-		lblNewLabel_1.setText("Dėžutės Nr. 1");
+		Label boxNrTitle = new Label(shell, SWT.NONE);
+		boxNrTitle.setFont(SWTResourceManager.getFont("Segoe UI", 14, SWT.BOLD));
+		boxNrTitle.setAlignment(SWT.CENTER);
+		boxNrTitle.setBounds(110, 105, 340, 30);
+		boxNrTitle.setVisible(true);
+		boxNrTitle.setText("Dėžutės Nr. " + boxNr);
 
-		Label lblNewLabel_2 = new Label(shell, SWT.NONE);
-		lblNewLabel_2.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
-		lblNewLabel_2.setBounds(25, 200, 170, 30);
-		lblNewLabel_2.setText("Įveskite anglišką žodį:");
+		Label enterENWordTitle = new Label(shell, SWT.NONE);
+		enterENWordTitle.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
+		enterENWordTitle.setBounds(25, 200, 170, 30);
+		enterENWordTitle.setText("Įveskite anglišką žodį:");
 
-		Label lblNewLabel_3 = new Label(shell, SWT.NONE);
-		lblNewLabel_3.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
-		lblNewLabel_3.setBounds(25, 160, 150, 30);
-		lblNewLabel_3.setText("Lietuviška reikšmė:");
+		Label ltValueTitle = new Label(shell, SWT.NONE);
+		ltValueTitle.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
+		ltValueTitle.setBounds(25, 160, 150, 30);
+		ltValueTitle.setText("Lietuviška reikšmė:");
 
-		Label lblNewLabel_4 = new Label(shell, SWT.NONE);
-		lblNewLabel_4.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
-		lblNewLabel_4.setBounds(25, 235, 70, 30);
-		lblNewLabel_4.setText("Tarimas:");
+		Label sayingTitle = new Label(shell, SWT.NONE);
+		sayingTitle.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
+		sayingTitle.setBounds(25, 235, 70, 30);
+		sayingTitle.setText("Tarimas:");
 
-		Label lblNewLabel_5 = new Label(shell, SWT.NONE);
-		lblNewLabel_5.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
-		lblNewLabel_5.setBounds(25, 275, 70, 30);
-		lblNewLabel_5.setText("Vertimas:");
+		Label translationTitle = new Label(shell, SWT.NONE);
+		translationTitle.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
+		translationTitle.setBounds(25, 275, 70, 30);
+		translationTitle.setText("Vertimas:");
 
-		Label lblNewLabel_6 = new Label(shell, SWT.NONE);
-		lblNewLabel_6.setBounds(80, 30, 90, 25);
-		lblNewLabel_6.setText("Liko išmokti:");
+		Label leftLearnTitle = new Label(shell, SWT.NONE);
+		leftLearnTitle.setBounds(80, 30, 90, 25);
+		leftLearnTitle.setText("Liko išmokti:");
 
-		Label lblNewLabel_7 = new Label(shell, SWT.NONE);
-		lblNewLabel_7.setBounds(220, 30, 90, 25);
-		lblNewLabel_7.setText("Dėžutėje yra:");
+		Label quantityInBoxTitle = new Label(shell, SWT.NONE);
+		quantityInBoxTitle.setBounds(220, 30, 90, 25);
+		quantityInBoxTitle.setText("Dėžutėje yra:");
 
-		Label lblNewLabel_8 = new Label(shell, SWT.NONE);
-		lblNewLabel_8.setBounds(360, 30, 90, 25);
-		lblNewLabel_8.setText("Jau išmokote:");
+		Label alreadyLearnedTitle = new Label(shell, SWT.NONE);
+		alreadyLearnedTitle.setBounds(360, 30, 90, 25);
+		alreadyLearnedTitle.setText("Jau išmokote:");
 
-		Label lblNewLabel_9 = new Label(shell, SWT.CENTER);
-		lblNewLabel_9.setBounds(380, 60, 50, 25);
-		lblNewLabel_9.setText(Integer.toString(learned));
+		Label learnedValue = new Label(shell, SWT.CENTER);
+		learnedValue.setBounds(380, 60, 50, 25);
+		learnedValue.setText(Integer.toString(learned));
 
-		Label lblNewLabel_10 = new Label(shell, SWT.CENTER);
-		lblNewLabel_10.setBounds(240, 60, 50, 25);
-		lblNewLabel_10.setText(Integer.toString(leftInBox));
+		Label leftInBoxValue = new Label(shell, SWT.CENTER);
+		leftInBoxValue.setBounds(240, 60, 50, 25);
+		leftInBoxValue.setText(Integer.toString(leftInBox));
 
 		btnNextWord.addMouseListener(new MouseAdapter() {
 			@Override
@@ -264,9 +268,8 @@ public class Boxes {
 											boxNr = 6;
 										} else {
 											currentBox = all.getBoxNA();
-											// boxNr = 1;
-											lblNewLabel_1.setText("Pradėti nuo dėžutės Nr. 1");
-											moving.updateBoxFromMovingList(all.getMovingDown(), all.getBox1());
+											boxNrTitle.setText("Pradėti nuo dėžutės Nr. 1");
+											moving.updateBoxFromMovingList(all.getMovingDown(), all.getBox1()); 	// perkelia zodzius is tarpines dezutes i aukstesne
 											moving.updateBoxFromMovingList(all.getMovingUp2(), all.getBox2());
 											moving.updateBoxFromMovingList(all.getMovingUp3(), all.getBox3());
 											moving.updateBoxFromMovingList(all.getMovingUp4(), all.getBox4());
@@ -274,10 +277,9 @@ public class Boxes {
 											moving.updateBoxFromMovingList(all.getMovingUp6(), all.getBox6());
 
 											if (!all.getUserList().isEmpty()) {
-												moving.updateBox1ByNewWords(all.getUserList(), all.getMovingDown(),
+												moving.updateBox1ByNewWords(all.getUserList(), all.getMovingDown(),		// papildo pirma dezute naujais zodziais
 														all.getBox1(), newWordQuantity);
 											}
-
 										}
 									}
 								}
@@ -287,9 +289,9 @@ public class Boxes {
 
 					if (!currentBox.isEmpty()) {
 						leftInBox = currentBox.size();
-						lblNewLabel_10.setText(Integer.toString(leftInBox));
+						leftInBoxValue.setText(Integer.toString(leftInBox));
 
-						lblNewLabel_1.setText("Dėžutės Nr. " + boxNr);
+						boxNrTitle.setText("Dėžutės Nr. " + boxNr);
 						text.setText("");
 						btnCheckWord.setVisible(true);
 						btnNextWord.setVisible(false);
@@ -299,8 +301,8 @@ public class Boxes {
 
 						int index = moving.RandomGenerator(currentBox);
 						chekingWordOBJ = currentBox.remove(index);
-
 						chekingWord = chekingWordOBJ.getWord();
+						wordId = chekingWordOBJ.getWordId();
 						wordTranslationValue.setText(chekingWordOBJ.getTranslation());
 						lblPhonetic.setText(chekingWordOBJ.getPhonetic());
 						lblENWord.setText(chekingWordOBJ.getWord());
@@ -311,14 +313,12 @@ public class Boxes {
 					}
 
 				} else {
-
 					btnNextWord.setVisible(false);
-					lblNewLabel.setVisible(true);
-					lblNewLabel_1.setText("PABAIGA!");
+					learnedAllWordsTitle.setVisible(true);
+					boxNrTitle.setText("PABAIGA!");
 					lblPhonetic.setVisible(false);
 					lblENWord.setVisible(false);
 					text.setVisible(false);
-
 					wordTranslationValue.setVisible(false);
 					lableIsTo.setVisible(false);
 				}
@@ -329,23 +329,28 @@ public class Boxes {
 			@Override
 			public void mouseUp(MouseEvent e) {
 
-				lblNewLabel_9.setText(Integer.toString(learned));
+				learnedValue.setText(Integer.toString(learned));
 				answerWord = text.getText();
 
 				if (answerWord.equalsIgnoreCase(chekingWord)) {
+					ud.autoSave(userId, wordId, boxNr + 1);			// atnaujina zodzio dezutes numeri
 					if (!(boxNr == 6)) {
 						color = SWT.COLOR_DARK_GREEN;
 						currentMoveBox.add(chekingWordOBJ);
+						//ud.autoSave(userId, wordId, boxNr + 1); 		// atnaujina zodzio dezutes numeri
 					} else {
 						learned++;
+						//dd.deleteAutoSave(userId, wordId, 6);		// istrina saugojimo informacija kaip zodis jau ismoktas
+					//	ud.autoSave(userId, wordId, boxNr + 1);
 					}
 				} else {
 					color = SWT.COLOR_RED;
 					all.getMovingDown().add(chekingWordOBJ);
+					ud.autoSave(userId, wordId, 1);					// atnaujina zodzio dezutes numeri
 				}
 
-				lblNewLabel_10.setText(Integer.toString(currentBox.size()));
-				lblNewLabel_9.setText(Integer.toString(learned));
+				leftInBoxValue.setText(Integer.toString(currentBox.size()));
+				learnedValue.setText(Integer.toString(learned));
 				leftLearnWordValue.setText(Integer.toString(primaryULsize - learned));
 				lblPhonetic.setForeground(SWTResourceManager.getColor(color));
 				lblENWord.setForeground(SWTResourceManager.getColor(color));
@@ -353,9 +358,9 @@ public class Boxes {
 				lblENWord.setVisible(true);
 				btnCheckWord.setVisible(false);
 				btnNextWord.setVisible(true);
-
 			}
 		});
 
 	}
+	
 }
